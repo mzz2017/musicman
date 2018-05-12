@@ -1,0 +1,29 @@
+$primary-blue: #409EFF;
+.page-wrapper {
+  width: 80%;
+  max-width: 1024px;
+  margin: 0 auto;
+  .search {
+    width: 50%;
+    min-width:200px;
+    margin: 2em auto 5em auto;
+  }
+  .songList {
+    width: 65%;
+    min-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+    .formatIcon {
+      width: 50px;
+      text-align: center;
+    }
+  }
+  .searchButton {
+    //font-size: 14px;
+    &:hover{
+      background: white;
+      color:rgba(255,0,0,.5);
+    }
+
+  }
+}
