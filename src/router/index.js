@@ -5,9 +5,9 @@ import MainPage from 'components/mainPage/mainPage'
 Vue.use(Router)
 
 export default new Router({
+  mode:'history',
   routes: [
     {
-      mode:'history',
       path: '/',
       name: 'mainPage',
       component: MainPage
