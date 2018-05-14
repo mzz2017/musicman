@@ -73,7 +73,7 @@
     methods: {
       handleOnClickDownload(format, strMediaMid) {
         //这个vkey应该是一个vip用户的，不知道什么时候会过期
-        let vkey = 'DA5451EECBE1E359F79C6240498EF8C9C29822D2DCDF8053703A205063985AB5B64E37EF5207C0E5E5A7F49B13D92D6A5595255EE1BB1406'
+        let vkey = window.localStorage.getItem('vkey')
         let url = `http://streamoc.music.tc.qq.com/${this.formatMap[format].prefix}00${strMediaMid}.${this.formatMap[format].suffix}?vkey=${vkey}&guid=1234567890&uin=1008611&fromtag=8`
         window.open(url, '_blank')
       },
@@ -88,7 +88,7 @@
           }
         }).then((response) => {
           let array = []
-          console.log(response.data.data)
+          process.env.NODE_ENV === 'development' && console.log(response.data.data)
           for (let index in response.data.data.song.list) {
             let item = response.data.data.song.list[index]
             let strSinger = ''
@@ -113,6 +113,24 @@
         }).catch((error) => {
           process.env.NODE_ENV === 'development' && console.log(error)
         })
+      },
+      getVkey() {
+        axios({
+          url: '/api/vkey',
+          methods: 'get'
+        }).then((response) => {
+          let vkey = response.data.vkey
+          window.localStorage.setItem('vkey', vkey)
+          window.localStorage.setItem('vkey_expire', Date.parse(new Date().toUTCString()).toString())
+        }).catch((error) => {
+          console.log('getVkey', error)
+        })
+      }
+    },
+    created() {
+      // 如果没有vkey或者vkey已经超时2个小时了，就再获取一下vkey
+      if (!window.localStorage.getItem('vkey') || Date.parse(new Date().toUTCString()) - parseInt(window.localStorage.getItem('vkey_expire')) > 2 * 60 * 60 * 1000) {
+        this.getVkey()
       }
     }
   }
