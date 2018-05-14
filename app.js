@@ -46,7 +46,7 @@ app.get('/api/vkey', (req, res) => {
     url: getVkeyUrl,
     methods: 'get'
   }).then((response) => {
-    res.json({vkey: response.data.items[0].vkey})
+    res.json({vkey: response.data.data.items[0].vkey})
   }).catch((error) => {
     console.log('getVkeyError', error)
     res.status(400).send('')
