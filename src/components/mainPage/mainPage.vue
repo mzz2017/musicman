@@ -1,13 +1,14 @@
 <template>
-  <div class="page-wrapper">
-    <el-input placeholder="来吧！点燃MusicMan！" v-model="songName" class="search">
+  <div class="page-wrapper" id="page-wrapper">
+    <el-input placeholder="来吧！点燃MusicMan！" v-model="searchContent" class="search">
       <el-button slot="append" class="searchButton icon-fire iconfont icon" @click="handleOnClickSearch"></el-button>
     </el-input>
     <el-table
       :data="songList"
       stripe
       empty-text="来吧！点燃MusicMan！"
-      class="songList">
+      class="songList"
+      id="listTable">
       <el-table-column
         prop="name"
         label="歌名"
@@ -38,6 +39,14 @@
         </template>
       </el-table-column>
     </el-table>
+    <div class="pagination" v-show="totalNum">
+      <el-pagination
+        layout="prev, pager, next"
+        :total="totalNum"
+        @current-change="handleOnCurrentPageChange"
+        :page-size=15>
+      </el-pagination>
+    </div>
   </div>
 </template>
 
@@ -48,7 +57,7 @@
     name: "mainPage",
     data() {
       return {
-        songName: '',
+        searchContent: '',
         songList: [],
         formatMap: {
           "ape": {
@@ -67,24 +76,36 @@
             prefix: "M5",
             suffix: "mp3"
           },
-        }
+        },
+        totalNum: 0,
+        searchContentKeeper: ''
       }
     },
     methods: {
       handleOnClickDownload(format, strMediaMid) {
-        //这个vkey应该是一个vip用户的，不知道什么时候会过期
         let vkey = window.localStorage.getItem('vkey')
         let url = `http://streamoc.music.tc.qq.com/${this.formatMap[format].prefix}00${strMediaMid}.${this.formatMap[format].suffix}?vkey=${vkey}&guid=1234567890&uin=1008611&fromtag=8`
         window.open(url, '_blank')
       },
-      handleOnClickSearch() {
-        let page = 0
+      handleOnClickSearch(page) {
+        //记录下这次搜索的内容，翻页的时候搜索不会因为实时更改的searchContent而改变搜索内容
+        this.searchContentKeeper = this.searchContent
+        this.search(page)
+      },
+      handleOnCurrentPageChange(currentPage) {
+        //翻页时将搜索框现在的内容改回上次记录的搜索内容
+        this.searchContent = this.searchContentKeeper
+        this.search(currentPage)
+      },
+      search(page) {
+        page = page ? page : 0
         axios({
           url: '/api/search',
           method: 'post',
           data: {
             page: page,
-            songName: encodeURIComponent(this.songName)
+            songName: encodeURIComponent(this.searchContentKeeper),
+            pageSize: 15
           }
         }).then((response) => {
           let array = []
@@ -108,8 +129,10 @@
               "strMediaMid": item.file.strMediaMid
             }
             array.push(object)
+            this.totalNum = response.data.data.song.totalnum
           }
           this.songList = array
+          window.scrollTo(0, 0)
         }).catch((error) => {
           process.env.NODE_ENV === 'development' && console.log(error)
         })
@@ -123,7 +146,7 @@
           window.localStorage.setItem('vkey', vkey)
           window.localStorage.setItem('vkey_expire', Date.parse(new Date().toUTCString()).toString())
         }).catch((error) => {
-          console.log('getVkey', error)
+          process.env.NODE_ENV === 'development' && console.log('getVkey', error)
         })
       }
     },
@@ -132,6 +155,12 @@
       if (!window.localStorage.getItem('vkey') || Date.parse(new Date().toUTCString()) - parseInt(window.localStorage.getItem('vkey_expire')) > 2 * 60 * 60 * 1000) {
         this.getVkey()
       }
+      window.onkeyup = (e) => {
+        if (e === event && e.key==='Enter') {
+          this.handleOnClickSearch()
+        }
+      }
+
     }
   }
 </script>
