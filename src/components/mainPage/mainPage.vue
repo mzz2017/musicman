@@ -45,7 +45,8 @@
         layout="prev, pager, next"
         :total="totalNum"
         @current-change="handleOnCurrentPageChange"
-        :page-size=15>
+        :page-size=15
+        :current-page.sync="currentPage">
       </el-pagination>
     </div>
     <el-dialog :title="dialogDownloadTitle"
@@ -63,6 +64,7 @@
         <div id="downloadSpeed">{{downloadSpeed}} kb/s</div>
       </div>
     </el-dialog>
+    <button @click="$forceUpdate()">sdfa</button>
   </div>
 </template>
 
@@ -95,6 +97,7 @@
           },
         },
         totalNum: 0,
+        currentPage: 1,
         searchContentKeeper: '',
         dialogDownloadVisible: false,
         dialogDownloadTitle: '成都-赵雷',
@@ -109,7 +112,7 @@
         //获取vkey
         let vkey = window.localStorage.getItem('vkey')
         //合成下载链接
-        let url = `http://streamoc.music.tc.qq.com/${this.formatMap[format].prefix}00${strMediaMid}.${this.formatMap[format].suffix}?vkey=${vkey}&guid=1234567890&uin=1008611&fromtag=8`
+        let url = `//streamoc.music.tc.qq.com/${this.formatMap[format].prefix}00${strMediaMid}.${this.formatMap[format].suffix}?vkey=${vkey}&guid=1234567890&uin=1008611&fromtag=8`
         //合成文件名
         let savename = `${songName}-${singer}.${this.formatMap[format].suffix}`
         //显示下载对话框
@@ -142,7 +145,7 @@
               lastCountTime = nowTime
               that.downloadSpeed = Math.floor(event.loaded / (nowTime - beginTime))
             }
-            console.log(event)
+            // console.log(event)
           }
         }, false)
         //下载完毕事件
@@ -157,17 +160,19 @@
         req.send(null)
       },
       handleOnClickSearch(page) {
-        //记录下这次搜索的内容，翻页的时候搜索不会因为实时更改的searchContent而改变搜索内容
-        this.searchContentKeeper = this.searchContent
-        this.search(page)
+        //改变query完成搜索
+
+        this.$router.push({path: '', query: {s: encodeURIComponent(this.searchContent), p: this.currentPage}})
       },
-      handleOnCurrentPageChange(currentPage) {
-        //翻页时将搜索框现在的内容改回上次记录的搜索内容
-        this.searchContent = this.searchContentKeeper
-        this.search(currentPage)
+      handleOnCurrentPageChange(currentPage, lval) {
+        if (currentPage === lval)
+          return
+        //翻页时将搜索框现在的内容改回上次记录的搜索内容，通过改变query进行搜索
+        this.$router.push({path: '', query: {s: encodeURIComponent(this.searchContentKeeper), p: this.currentPage}})
       },
       search(page) {
-        page = page ? page : 0
+        process.env.NODE_ENV === 'development' && console.log("进行了搜索")
+        page = page ? page : 1
         axios({
           url: '/api/search',
           method: 'post',
@@ -199,16 +204,19 @@
             }
             array.push(object)
           }
+          //更新歌单列表，更新分页：歌曲总数、当前页，界面到最顶
           this.totalNum = response.data.data.song.totalnum
           this.songList = array
           window.scrollTo(0, 0)
+          this.currentPage = page
         }).catch((error) => {
           process.env.NODE_ENV === 'development' && console.log(error)
         })
+
       },
       handleBeforeCloseDialogDownload(done) {
         //下载完毕则直接可以关闭
-        if (this.downloadStatus !== ''){
+        if (this.downloadStatus !== '') {
           done()
           return
         }
@@ -220,6 +228,18 @@
           .catch((error) => {
             process.env.NODE_ENV === 'development' && console.log(error)
           });
+      },
+      searchByQuery() {
+        //根据query填充搜索框并完成搜索
+        if (this.$route.query.hasOwnProperty('s')) {
+          this.searchContentKeeper = this.searchContent = decodeURIComponent(this.$route.query.s)
+          let page = 1
+          if (this.$route.query.hasOwnProperty('p')) {
+            page = parseInt(this.$route.query.p)
+            page = isNaN(page) ? 1 : page
+          }
+          this.search(page)
+        }
       },
       getVkey() {
         axios({
@@ -239,10 +259,25 @@
       if (!window.localStorage.getItem('vkey') || Date.parse(new Date().toUTCString()) - parseInt(window.localStorage.getItem('vkey_expire')) > 2 * 60 * 60 * 1000) {
         this.getVkey()
       }
+      //按下Enter开始搜索
       window.onkeyup = (e) => {
         if (e === event && e.key === 'Enter') {
           this.handleOnClickSearch()
         }
+      }
+      //根据search搜索
+      this.searchByQuery()
+    },
+    computed: {
+      query() {
+        return this.$route.query
+      }
+    },
+    watch: {
+      query() {
+        //监测query，一旦改变就搜索
+        process.env.NODE_ENV === 'development' && console.log('query改变了，进行搜索')
+        this.searchByQuery()
       }
     }
   }
