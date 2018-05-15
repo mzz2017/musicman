@@ -61,10 +61,12 @@
                      :percentage="downloadProgress"
                      :status="downloadStatus"
         ></el-progress>
-        <div id="downloadSpeed">{{downloadSpeed}} kb/s</div>
+        <div class="tip">{{downloadSpeed}} kb/s</div>
+        <div class="tip" v-show="downloadWrong">出了点问题, 请复制链接地址到下载器自行下载: <a :href="downloadURL"
+                                                                 :download="downloadSaveName" target="_blank">下载链接</a>
+        </div>
       </div>
     </el-dialog>
-    <button @click="$forceUpdate()">sdfa</button>
   </div>
 </template>
 
@@ -104,7 +106,10 @@
         downloadProgress: 0,
         downloadStatus: '',
         downloadSpeed: 0,
-        downloadAbort: false
+        downloadAbort: false,
+        downloadWrong: false,
+        downloadURL: '',
+        downloadSaveName: ''
       }
     },
     methods: {
@@ -115,53 +120,10 @@
         let url = `//streamoc.music.tc.qq.com/${this.formatMap[format].prefix}00${strMediaMid}.${this.formatMap[format].suffix}?vkey=${vkey}&guid=1234567890&uin=1008611&fromtag=8`
         //合成文件名
         let savename = `${songName}-${singer}.${this.formatMap[format].suffix}`
-        //显示下载对话框
-        this.dialogDownloadVisible = true
-        this.dialogDownloadTitle = savename
-        //创建XMLHttpRequest对象
-        let req = new XMLHttpRequest();
-        //类型设为blob
-        req.responseType = "blob"
-        req.open("GET", url, true);
-        //初始化变量
-        let that = this
-        this.downloadAbort = false
-        this.downloadProgress = 0
-        this.downloadStatus = ''
-
-        let beginTime = Date.parse(new Date().toUTCString())
-        let lastCountTime = beginTime
-        //监听下载进度
-        req.addEventListener('progress', (event) => {
-          if (event.lengthComputable) {
-            if (that.downloadAbort) {
-              that.downloadAbort = false
-              req.abort()
-            }
-            that.downloadProgress = Math.floor(event.loaded / event.total * 100)
-            //取下载速度(B/ms, 即KB/s), 速度变动间隔为1s
-            let nowTime = Date.parse(new Date().toUTCString())
-            if (nowTime - lastCountTime > 500) {
-              lastCountTime = nowTime
-              that.downloadSpeed = Math.floor(event.loaded / (nowTime - beginTime))
-            }
-            // console.log(event)
-          }
-        }, false)
-        //下载完毕事件
-        req.onreadystatechange = function () {
-          if (req.readyState === 4 && req.status === 200) {
-            let blob = new Blob([req.response], {type: 'application/force-download'})
-            download(blob, savename)
-            that.downloadStatus = 'success'
-          }
-        }
-        //敬请开始吧
-        req.send(null)
+        this.downloadByXHR(url, savename)
       },
-      handleOnClickSearch(page) {
+      handleOnClickSearch() {
         //改变query完成搜索
-
         this.$router.push({path: '', query: {s: encodeURIComponent(this.searchContent), p: this.currentPage}})
       },
       handleOnCurrentPageChange(currentPage, lval) {
@@ -212,7 +174,6 @@
         }).catch((error) => {
           process.env.NODE_ENV === 'development' && console.log(error)
         })
-
       },
       handleBeforeCloseDialogDownload(done) {
         //下载完毕则直接可以关闭
@@ -252,6 +213,58 @@
         }).catch((error) => {
           process.env.NODE_ENV === 'development' && console.log('getVkey', error)
         })
+      },
+      downloadByXHR(url, savename) {
+        //显示下载对话框
+        this.downloadWrong = false
+        this.dialogDownloadVisible = true
+        this.dialogDownloadTitle = savename
+        //创建XMLHttpRequest对象
+        let req = new XMLHttpRequest();
+        //类型设为blob
+        req.responseType = "blob"
+        req.open("GET", url, true);
+        //初始化变量
+        let that = this
+        this.downloadAbort = false
+        this.downloadProgress = 0
+        this.downloadStatus = ''
+
+        let beginTime = Date.parse(new Date().toUTCString())
+        let lastCountTime = beginTime
+        //监听下载进度
+        req.addEventListener('progress', (event) => {
+          if (event.lengthComputable) {
+            if (that.downloadAbort) {
+              that.downloadAbort = false
+              req.abort()
+            }
+            that.downloadProgress = Math.floor(event.loaded / event.total * 100)
+            //取下载速度(B/ms, 即KB/s), 速度变动间隔为1s
+            let nowTime = Date.parse(new Date().toUTCString())
+            if (nowTime - lastCountTime > 500) {
+              lastCountTime = nowTime
+              that.downloadSpeed = Math.floor(event.loaded / (nowTime - beginTime))
+            }
+            // console.log(event)
+          }
+        }, false)
+        //下载完毕事件
+        req.onreadystatechange = function () {
+          if (req.readyState === 4 && req.status === 200) {
+            let blob = new Blob([req.response], {type: 'application/force-download'})
+            download(blob, savename)
+            that.downloadStatus = 'success'
+          } else if (req.readyState === 4 && req.status !== 200) {
+            //下载出了问题
+            that.downloadWrong = true
+            that.downloadURL = `http:${url}`
+            that.downloadSaveName = savename
+            that.downloadStatus = 'exception'
+          }
+        }
+        //敬请开始吧
+        req.send(null)
       }
     },
     created() {
@@ -261,7 +274,7 @@
       }
       //按下Enter开始搜索
       window.onkeyup = (e) => {
-        if (e === event && e.key === 'Enter') {
+        if (e.key === 'Enter') {
           this.handleOnClickSearch()
         }
       }
