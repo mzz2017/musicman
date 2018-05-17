@@ -1,12 +1,12 @@
 <template>
   <div class="page-wrapper" id="page-wrapper">
-    <el-input placeholder="来吧！点燃MusicMan！" v-model="searchContent" class="search">
+    <el-input :placeholder="emptyText" v-model="searchContent" class="search">
       <el-button slot="append" class="searchButton icon-fire iconfont icon" @click="handleOnClickSearch"></el-button>
     </el-input>
     <el-table
       :data="songList"
       stripe
-      empty-text="来吧！点燃MusicMan！"
+      :empty-text="emptyText"
       class="songList"
       id="listTable">
       <el-table-column
@@ -63,21 +63,23 @@
         ></el-progress>
         <div class="tip">{{downloadSpeed}} kb/s</div>
         <div class="tip" v-show="downloadWrong">出了点问题, 请复制链接地址到下载器自行下载: <a :href="downloadURL"
-                                                                 :download="downloadSaveName" target="_blank">下载链接</a>
+                                                                           :download="downloadSaveName" target="_blank">下载链接</a>
         </div>
       </div>
     </el-dialog>
   </div>
 </template>
-
 <script>
   import axios from 'axios'
   import download from '../../common/js/download'
+  import browser from '../../common/js/browser'
+  import jsonp from 'jsonp'
 
   export default {
     name: "mainPage",
     data() {
       return {
+        emptyText: '来吧！点燃MusicMan！',
         searchContent: '',
         songList: [],
         formatMap: {
@@ -113,7 +115,51 @@
       }
     },
     methods: {
+      isSupportedBrowser() {
+        //0为支持，1表示不支持，2表示极其不支持（网页被转码，影响正常效果）
+        if (browser.versions.mobile) {//判断是否是移动设备打开。browser代码在下面
+          var ua = navigator.userAgent.toLowerCase();//获取判断用的对象
+          if (ua.match(/MicroMessenger/i) == "micromessenger") {
+            //在微信中打开
+            return 2
+          }
+          if (ua.match(/WeiBo/i) == "weibo") {
+            //在新浪微博客户端打开
+            return 1
+          }
+          if (ua.match(/QQ/i) == "qq") {
+            //在QQ空间打开
+            return 1
+          }
+        }
+        return 0
+      },
+      popupNotSupported(message) {
+        //使用u6.gg提供的API将网址缩短一下，弹出提示
+        let currentURL = encodeURIComponent(location.href)
+        currentURL = currentURL.replace('localhost', '127.0.0.1')
+        let url = `http://u6.gg/api.php?format=jsonp&url=${currentURL}`
+        jsonp(url, (err, data) => {
+          if (err || data.err === '') {
+            process.env.NODE_ENV === 'development' && console.log(data.err)
+            this.$alert(`${message}<br />链接地址： ${data.url}`, 'Sorry!', {
+              confirmButtonText: '朕知道了',
+              dangerouslyUseHTMLString: true
+            })
+          } else {
+            console.log("url", url)
+            this.$alert(`${message}<br />${location.host}`, 'Sorry!', {
+              confirmButtonText: '朕知道了',
+              dangerouslyUseHTMLString: true
+            })
+          }
+        })
+      },
       handleOnClickDownload(format, strMediaMid, songName, singer) {
+        if (this.isSupportedBrowser() === 1) {
+          this.popupNotSupported('当前浏览器无法进行下载，请换个浏览器打开本页面.')
+          return
+        }
         //获取vkey
         let vkey = window.localStorage.getItem('vkey')
         //合成下载链接
@@ -201,6 +247,13 @@
           }
           this.search(page)
         }
+        else {
+          //  说明在主页了，清空数据
+          this.totalNum = 0
+          this.songList = []
+          this.searchContent = ''
+          window.scrollTo(0, 0)
+        }
       },
       getVkey() {
         axios({
@@ -253,7 +306,7 @@
         req.onreadystatechange = function () {
           if (req.readyState === 4 && req.status === 200) {
             let blob = new Blob([req.response], {type: 'application/force-download'})
-            download(blob, savename)
+            download(blob, savename, '')
             that.downloadStatus = 'success'
           } else if (req.readyState === 4 && req.status !== 200) {
             //下载出了问题
@@ -268,6 +321,15 @@
       }
     },
     created() {
+      console.log(location)
+      if (this.isSupportedBrowser() === 2) {
+        // this.popupNotSupported('亲，我们检测到了不兼容问题，换个浏览器打开我吧！') //经转码后无法显示
+        this.emptyText = 'not support'
+        //试了很久发现下面这个写法才行
+        location.replace('/static/notsupport.html')
+        return
+      }
+      // this.$router.push({name: 'notSupport'})
       // 如果没有vkey或者vkey已经超时2个小时了，就再获取一下vkey
       if (!window.localStorage.getItem('vkey') || Date.parse(new Date().toUTCString()) - parseInt(window.localStorage.getItem('vkey_expire')) > 2 * 60 * 60 * 1000) {
         this.getVkey()
@@ -278,12 +340,12 @@
           this.handleOnClickSearch()
         }
       }
-      //根据search搜索
+      //根据query搜索
       this.searchByQuery()
     },
     computed: {
       query() {
-        return this.$route.query
+        return this.$route.fullPath
       }
     },
     watch: {

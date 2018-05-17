@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>请在浏览器中打开</title>
+</head>
+<body>
+<div id="page-wrapper">
+  <div>
+    <img src="sad.png" id="sadimg">
+    <p id="tip">亲，我们检测到了不兼容问题，换个浏览器打开我吧！</p>
+  </div>
+</div>
+
+<style>
+  #page-wrapper {
+    /*WeChat转码后居然不支持fixed，真是哔了狗*/
+    position: absolute;
+    left: 25%;
+    top: 25%;
+  }
+
+  #sadimg {
+    max-width: 100%;
+  }
+
+  #tip {
+    display: block;
+    font-weight: bold;
+    margin: 0 auto 3em auto;
+    width: 80%;
+    line-height: 1.6em;
+    text-align: center;
+  }
+</style>
+</body>
+</html>

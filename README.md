@@ -23,6 +23,9 @@ pm2 start app.js --name musicman
 
 # 终止后端进程
 pm2 delete musciman
+
+# 生产环境nginx配置
+参见https://segmentfault.com/q/1010000006177894
 ```
 
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
