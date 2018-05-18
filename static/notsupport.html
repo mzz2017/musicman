@@ -2,36 +2,65 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>请在浏览器中打开</title>
+  <title>MusicMan</title>
 </head>
 <body>
 <div id="page-wrapper">
   <div>
     <img src="sad.png" id="sadimg">
-    <p id="tip">亲，我们检测到了不兼容问题，换个浏览器打开我吧！</p>
+    <p class="tip">亲，我们检测到了不兼容问题，换个浏览器打开我吧！</p>
+    <p class="tip">复制地址在浏览器打开：</p>
+    <p class="tip" id="url"></p>
   </div>
 </div>
 
 <style>
+  html body {
+    overflow: hidden;
+  }
+
   #page-wrapper {
     /*WeChat转码后居然不支持fixed，真是哔了狗*/
     position: absolute;
-    left: 25%;
-    top: 25%;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
   }
 
   #sadimg {
     max-width: 100%;
+    margin: 0 auto;
+    display: block;
   }
 
-  #tip {
+  .tip {
     display: block;
     font-weight: bold;
-    margin: 0 auto 3em auto;
+    font-size: 35px;
+    margin: 0 auto .5em auto;
     width: 80%;
     line-height: 1.6em;
     text-align: center;
   }
+
+  .tip:first-of-type:not(#url) {
+    margin-bottom: 2em;
+  }
+  .tip:nth-of-type(2):not(#url) {
+    margin-bottom: 0;
+  }
+  #url {
+    line-height: 3em;
+    height: 3em;
+  }
 </style>
+<script lang="text/javascript">
+  window.onload = function () {
+    document.getElementById('url').innerText = window.location.origin
+  }
+</script>
 </body>
 </html>

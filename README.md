@@ -1,6 +1,6 @@
 # musicman
 
-> 一个无限制下载QQ无损音乐的应用
+> 一个无限制下载QQ无损音乐的应用 Demo: http://music.mzz.pub
 
 ## Build Setup
 
@@ -22,10 +22,9 @@ npm install -g pm2
 pm2 start app.js --name musicman
 
 # 终止后端进程
-pm2 delete musciman
+pm2 delete musicman
 
 # 生产环境nginx配置
 参见https://segmentfault.com/q/1010000006177894
 ```
-
-For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
++ 注意：域名如果使用SSL，则XHR所请求的域名必须是SSL的，但由于我们使用的下载链接所对应的证书无效，会导致下载失败的问题，解决方案参见: [**issue3**](https://github.com/mzz2017/musicman/issues/3) 

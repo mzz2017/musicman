@@ -71,7 +71,7 @@
 </template>
 <script>
   import axios from 'axios'
-  import download from '../../common/js/download'
+  import {download, saver} from '../../common/js/download'
   import browser from '../../common/js/browser'
   import jsonp from 'jsonp'
 
@@ -85,19 +85,23 @@
         formatMap: {
           "ape": {
             prefix: "A0",
-            suffix: "ape"
+            suffix: "ape",
+            mine: 'audio/ape'
           },
           "flac": {
             prefix: "F0",
-            suffix: "flac"
+            suffix: "flac",
+            mine: 'audio/x-flac'
           },
           "320k": {
             prefix: "M8",
-            suffix: "mp3"
+            suffix: "mp3",
+            mine: 'audio/mpeg'
           },
           "128k": {
             prefix: "M5",
-            suffix: "mp3"
+            suffix: "mp3",
+            mine: 'audio/mpeg'
           },
         },
         totalNum: 0,
@@ -111,7 +115,8 @@
         downloadAbort: false,
         downloadWrong: false,
         downloadURL: '',
-        downloadSaveName: ''
+        downloadSaveName: '',
+        support: null
       }
     },
     methods: {
@@ -119,20 +124,27 @@
         //0为支持，1表示不支持，2表示极其不支持（网页被转码，影响正常效果）
         if (browser.versions.mobile) {//判断是否是移动设备打开。browser代码在下面
           var ua = navigator.userAgent.toLowerCase();//获取判断用的对象
+          let plat = browser.versions.android ? 'android' : 'ios'
           if (ua.match(/MicroMessenger/i) == "micromessenger") {
             //在微信中打开
-            return 2
+            return {type: 'wechat', plat: plat}
           }
           if (ua.match(/WeiBo/i) == "weibo") {
             //在新浪微博客户端打开
-            return 1
+            return {type: 'weibo', plat: plat}
           }
-          if (ua.match(/QQ/i) == "qq") {
-            //在QQ空间打开
-            return 1
+          if (ua.match(/QQ\//i) == "qq/") {
+            //在QQ中打开
+            return {type: 'qq', plat: plat}
           }
+          if (ua.match(/qzone\//i) == "qzone/") {
+            //在QQ空间app中打开
+            return {type: 'qzone', plat: plat}
+          }
+          //手机端几乎都不支持用blob方式对下载文件更名
+          return {type: 'mobile', plat: plat}
         }
-        return 0
+        return {type: 'pc', plat: 'pc'}
       },
       popupNotSupported(message) {
         //使用u6.gg提供的API将网址缩短一下，弹出提示
@@ -141,14 +153,15 @@
         let url = `http://u6.gg/api.php?format=jsonp&url=${currentURL}`
         jsonp(url, (err, data) => {
           if (err || data.err === '') {
+            //如果出现error，则只返回location.origin
             process.env.NODE_ENV === 'development' && console.log(data.err)
-            this.$alert(`${message}<br />链接地址： ${data.url}`, 'Sorry!', {
+            this.$alert(`${message}<br />链接地址： ${location.origin}`, 'Sorry!', {
               confirmButtonText: '朕知道了',
               dangerouslyUseHTMLString: true
             })
           } else {
-            console.log("url", url)
-            this.$alert(`${message}<br />${location.host}`, 'Sorry!', {
+            //一切顺利，返回短地址
+            this.$alert(`${message}<br />链接地址： ${data.url}`, 'Sorry!', {
               confirmButtonText: '朕知道了',
               dangerouslyUseHTMLString: true
             })
@@ -156,17 +169,24 @@
         })
       },
       handleOnClickDownload(format, strMediaMid, songName, singer) {
-        if (this.isSupportedBrowser() === 1) {
-          this.popupNotSupported('当前浏览器无法进行下载，请换个浏览器打开本页面.')
-          return
-        }
         //获取vkey
         let vkey = window.localStorage.getItem('vkey')
         //合成下载链接
         let url = `//streamoc.music.tc.qq.com/${this.formatMap[format].prefix}00${strMediaMid}.${this.formatMap[format].suffix}?vkey=${vkey}&guid=1234567890&uin=1008611&fromtag=8`
         //合成文件名
         let savename = `${songName}-${singer}.${this.formatMap[format].suffix}`
-        this.downloadByXHR(url, savename)
+        if (this.support.plat === 'ios') {
+          //ios不支持下载文件
+          this.popupNotSupported('ios系统限制存在，无法下载文件，请更换设备再次操作')
+          return
+        } else if (this.support.plat === 'android') {
+          //安卓端那就只能随缘改存储名了吧
+          this.downloadOrdinarily(url, savename)
+          if (this.support.type === 'qq')
+            alert('注意，由于当前浏览器的兼容性问题，我们无法确定文件的保存位置和文件名，请下载完毕后自行确认！')
+          return
+        }
+        this.downloadByXHR(url, savename, this.formatMap[format].mine)
       },
       handleOnClickSearch() {
         //改变query完成搜索
@@ -267,7 +287,13 @@
           process.env.NODE_ENV === 'development' && console.log('getVkey', error)
         })
       },
-      downloadByXHR(url, savename) {
+      downloadOrdinarily(url, savename) {
+        if (saver(url, savename))
+          return true
+        else
+          return window.open(url, '_blank')
+      },
+      downloadByXHR(url, savename, mineType) {
         //显示下载对话框
         this.downloadWrong = false
         this.dialogDownloadVisible = true
@@ -293,7 +319,7 @@
               req.abort()
             }
             that.downloadProgress = Math.floor(event.loaded / event.total * 100)
-            //取下载速度(B/ms, 即KB/s), 速度变动间隔为1s
+            //取下载速度(B/ms, 即KB/s), 速度更新间隔为0.5s
             let nowTime = Date.parse(new Date().toUTCString())
             if (nowTime - lastCountTime > 500) {
               lastCountTime = nowTime
@@ -305,8 +331,9 @@
         //下载完毕事件
         req.onreadystatechange = function () {
           if (req.readyState === 4 && req.status === 200) {
-            let blob = new Blob([req.response], {type: 'application/force-download'})
-            download(blob, savename, '')
+            if (download(req.response, savename, mineType) === false) {
+              this.downloadOrdinarily(url, savename)
+            }
             that.downloadStatus = 'success'
           } else if (req.readyState === 4 && req.status !== 200) {
             //下载出了问题
@@ -318,18 +345,21 @@
         }
         //敬请开始吧
         req.send(null)
+      },
+      compatibilityCheck() {
+        this.support = this.isSupportedBrowser()
+        if (this.support.type === 'wechat' || (this.support.plat === 'android' && this.support.type === 'weibo')) {
+          // this.popupNotSupported('亲，我们检测到了不兼容问题，换个浏览器打开我吧！') //经转码后无法显示
+          this.emptyText = 'not support'
+          //试了很久发现下面这个写法才行
+          location.replace('/static/notsupport.html')
+          return
+        }
       }
     },
     created() {
-      console.log(location)
-      if (this.isSupportedBrowser() === 2) {
-        // this.popupNotSupported('亲，我们检测到了不兼容问题，换个浏览器打开我吧！') //经转码后无法显示
-        this.emptyText = 'not support'
-        //试了很久发现下面这个写法才行
-        location.replace('/static/notsupport.html')
-        return
-      }
-      // this.$router.push({name: 'notSupport'})
+      this.compatibilityCheck()
+
       // 如果没有vkey或者vkey已经超时2个小时了，就再获取一下vkey
       if (!window.localStorage.getItem('vkey') || Date.parse(new Date().toUTCString()) - parseInt(window.localStorage.getItem('vkey_expire')) > 2 * 60 * 60 * 1000) {
         this.getVkey()

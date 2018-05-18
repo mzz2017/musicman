@@ -31,6 +31,10 @@ app.post('/api/search', jsonParser, (req, res) => {
   axios({
     url: url,
     method: 'get',
+    proxy: {//国内服务器请删去proxy以提高访问速度
+      host: 'm.mzz.pub',
+      port: '6666'
+    }
   }).then((response) => {
     res.json(response.data)
   }).catch((error) => {
@@ -45,9 +49,9 @@ app.get('/api/vkey', (req, res) => {
   axios({
     url: getVkeyUrl,
     methods: 'get',
-    proxy:{//国内服务器请删去proxy以提高访问速度
-      host:'m.mzz.pub',
-      port:'6666'
+    proxy: {//国内服务器请删去proxy以提高访问速度
+      host: 'm.mzz.pub',
+      port: '6666'
     }
   }).then((response) => {
     res.json({vkey: response.data.data.items[0].vkey})
