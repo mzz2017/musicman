@@ -12,5 +12,6 @@ axios.interceptors.response.use((res) => {
   store.commit('changeLoadingState', false)
   return res
 }, (error) => {
+  store.commit('changeLoadingState', false)
   return Promise.reject(error)
 })

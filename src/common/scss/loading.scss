@@ -23,6 +23,11 @@ $--padding: 2px;
     margin: 0;
     font-family: 'HoangYen11';
   }
+  .refresh {
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+  }
   .progress-wrapper {
     width: $--width;
     height: $--progress-height;
@@ -69,16 +74,5 @@ $--padding: 2px;
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, .1);
-  }
-}
-.loading-fade-leave-active {
-  animation: loading-fade-out .3s;
-}
-@keyframes loading-fade-out {
-  0% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
   }
 }

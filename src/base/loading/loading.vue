@@ -10,6 +10,7 @@
           </div>
         </div>
       </div>
+      <p class="refresh" v-show="progressValue===99" @click="location.reload(true)">刷新</p>
       <div class="overlay" v-if="overlay"></div>
     </div>
   </transition>
@@ -44,6 +45,7 @@
       }
     },
     mounted() {
+      //2500是因为我将所有axios请求timeout设为了2500ms
       setTimeout(() => {
         this.progressValue = Math.max(10, this.progressValue)
       }, 250)
@@ -60,7 +62,7 @@
         this.progressValue = Math.max(80, this.progressValue)
       }, 2000)
       setTimeout(() => {
-        this.progressValue = Math.max(100, this.progressValue)
+        this.progressValue = Math.max(99, this.progressValue)
       }, 2500)
     }
   }

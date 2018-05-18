@@ -67,7 +67,9 @@
         </div>
       </div>
     </el-dialog>
-    <loading v-show="isLoading"></loading>
+    <transition name="loading-fade">
+      <loading v-if="isLoading"></loading>
+    </transition>
   </div>
 </template>
 <script>
@@ -218,7 +220,7 @@
             songName: encodeURIComponent(this.searchContentKeeper),
             pageSize: 15
           },
-          timeout: 2500
+          timeout: 5000
         }).then((response) => {
           let array = []
           process.env.NODE_ENV === 'development' && console.log(response.data.data)
@@ -289,7 +291,7 @@
         axios({
           url: '/api/vkey',
           methods: 'get',
-          timeout: 2500
+          timeout: 5000
         }).then((response) => {
           let vkey = response.data.vkey
           window.localStorage.setItem('vkey', vkey)
