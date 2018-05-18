@@ -67,16 +67,25 @@
         </div>
       </div>
     </el-dialog>
+    <loading v-show="isLoading"></loading>
   </div>
 </template>
 <script>
+  import Loading from 'base/loading/loading'
+
   import axios from 'axios'
   import {download, saver} from '../../common/js/download'
   import browser from '../../common/js/browser'
   import jsonp from 'jsonp'
+  import {mapState} from 'vuex'
+  import store from 'store/index'
 
   export default {
     name: "mainPage",
+    store,
+    components: {
+      Loading
+    },
     data() {
       return {
         emptyText: '来吧！点燃MusicMan！',
@@ -151,7 +160,7 @@
         let currentURL = encodeURIComponent(location.href)
         currentURL = currentURL.replace('localhost', '127.0.0.1')
         let url = `http://u6.gg/api.php?format=jsonp&url=${currentURL}`
-        jsonp(url, (err, data) => {
+        jsonp(url, {timeout: 2500}, (err, data) => {
           if (err || data.err === '') {
             //如果出现error，则只返回location.origin
             process.env.NODE_ENV === 'development' && console.log(data.err)
@@ -208,7 +217,8 @@
             page: page,
             songName: encodeURIComponent(this.searchContentKeeper),
             pageSize: 15
-          }
+          },
+          timeout: 2500
         }).then((response) => {
           let array = []
           process.env.NODE_ENV === 'development' && console.log(response.data.data)
@@ -278,7 +288,8 @@
       getVkey() {
         axios({
           url: '/api/vkey',
-          methods: 'get'
+          methods: 'get',
+          timeout: 2500
         }).then((response) => {
           let vkey = response.data.vkey
           window.localStorage.setItem('vkey', vkey)
@@ -376,7 +387,8 @@
     computed: {
       query() {
         return this.$route.fullPath
-      }
+      },
+      ...mapState(['isLoading'])
     },
     watch: {
       query() {

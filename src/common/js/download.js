@@ -113,7 +113,6 @@ export function saver(url, fn, winMode) {
         }, 250);
       }
     }, 66);
-    alert('h5')
     return true;
   }
 

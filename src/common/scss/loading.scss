@@ -1,0 +1,84 @@
+$--theme-color: #0F4DA8;
+$--theme-to-color: #437DD4;
+$--background-color: white;
+$--border-color: #6A94D4;
+$--width: 120px;
+$--progress-height: 12px;
+$--padding: 2px;
+.loading {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  //display: table;
+  height: 100px;
+  width: $--width;
+  z-index: 10000;
+  margin: auto;
+  padding-bottom: 20%;
+  .title {
+    color: $--theme-color;
+    font-weight: bold;
+    margin: 0;
+    font-family: 'HoangYen11';
+  }
+  .progress-wrapper {
+    width: $--width;
+    height: $--progress-height;
+    background: $--border-color;
+    border-radius: 10px;
+    .progress-background {
+      position: relative;
+      top: $--padding;
+      left: $--padding;
+      width: $--width - $--padding * 2;
+      height: $--progress-height - $--padding * 2;
+      background: $--background-color;
+      border-radius: 10px;
+      #progress {
+        position: relative;
+        display: flex;
+        left: $--padding/2;
+        top: $--padding/2;
+        height: $--progress-height - $--padding * 3;
+        width: $--width - $--padding * 3;
+        background: transparent;
+        overflow: hidden;
+        border-radius: 10px;
+        .progress {
+          height: 100%;
+          transition: width .5s linear;
+          width: 0;
+          &:first-of-type {
+            //width: 90px;
+            background: $--theme-color;
+          }
+          &:nth-of-type(2) {
+            background: linear-gradient(to right, $--theme-color, $--background-color);
+            //width:25px;
+          }
+        }
+      }
+    }
+  }
+  .overlay {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, .1);
+  }
+}
+.loading-fade-leave-active {
+  animation: loading-fade-out .3s;
+}
+@keyframes loading-fade-out {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

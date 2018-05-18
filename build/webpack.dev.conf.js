@@ -36,7 +36,8 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         let url = `http://c.y.qq.com/soso/fcgi-bin/client_search_cp?ct=24&qqmusic_ver=1298&new_json=1&remoteplace=txt.yqq.center&t=0&aggr=1&cr=1&catZhida=1&lossless=0&flag_qc=0&p=${body.page}&n=${body.pageSize}&w=${body.songName}&&jsonpCallback=searchCallbacksong2020&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0`
         axios({
           url: url,
-          method: 'get'
+          method: 'get',
+          timeout: 2500
         }).then((response) => {
           // console.log('ok', response)
           res.json(response.data)
@@ -52,7 +53,8 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         let getVkeyUrl = `http://c.y.qq.com/base/fcgi-bin/fcg_music_express_mobile3.fcg?g_tk=0&loginUin=${uin}&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0&cid=205361747&uin=${uin}&songmid=003a1tne1nSz1Y&filename=C400003a1tne1nSz1Y.m4a&guid=${guid}`
         axios({
           url: getVkeyUrl,
-          methods: 'get'
+          methods: 'get',
+          timeout: 2500
         }).then((response) => {
           res.json({vkey: response.data.data.items[0].vkey})
         }).catch((error) => {

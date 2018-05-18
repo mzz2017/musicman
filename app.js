@@ -8,17 +8,6 @@ var axios = require('axios')
 app.use('/api', apiRoutes)
 const PORT = 9000
 
-function getVkey() {
-  axios({
-    url: getVkeyUrl,
-    methods: 'get'
-  }).then((response) => {
-    return response.data.items[0].vkey
-  }).catch((error) => {
-    console.log('getVkey', error)
-  })
-}
-
 app.post('/api/search', jsonParser, (req, res) => {
   let body = req.body
   if (body.songName === undefined) {
@@ -34,7 +23,8 @@ app.post('/api/search', jsonParser, (req, res) => {
     proxy: {//国内服务器请删去proxy以提高访问速度
       host: 'm.mzz.pub',
       port: '6666'
-    }
+    },
+    timeout: 2500
   }).then((response) => {
     res.json(response.data)
   }).catch((error) => {
@@ -52,7 +42,8 @@ app.get('/api/vkey', (req, res) => {
     proxy: {//国内服务器请删去proxy以提高访问速度
       host: 'm.mzz.pub',
       port: '6666'
-    }
+    },
+    timeout: 2500
   }).then((response) => {
     res.json({vkey: response.data.data.items[0].vkey})
   }).catch((error) => {

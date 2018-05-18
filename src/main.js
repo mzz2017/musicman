@@ -6,6 +6,7 @@ import router from './router'
 import Element from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import 'normalize.css'
+import 'interceptor/interceptor'
 
 Vue.use(Element)
 
