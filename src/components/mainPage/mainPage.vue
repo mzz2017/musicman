@@ -201,7 +201,7 @@
       },
       handleOnClickSearch() {
         //改变query完成搜索
-        this.$router.push({path: '', query: {s: encodeURIComponent(this.searchContent), p: this.currentPage}})
+        this.$router.push({path: '', query: {s: encodeURIComponent(this.searchContent), p: '1'}})
       },
       handleOnCurrentPageChange(currentPage, lval) {
         if (currentPage === lval)

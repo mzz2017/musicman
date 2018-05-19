@@ -37,6 +37,7 @@
     watch: {
       progressValue(val) {
         let progressElems = document.getElementsByClassName('progress')
+        //由于100%和宽度150px的比例是1.5……emm好吧就解释到这里好了……1.9是实验值
         progressElems[0].style.width = `${Math.round((val - 20) * 1.9)}px`
         progressElems[1].style.width = val < 20 ? `${val}px` : val < 80 ? '20px' : `${100 - val}px`
       },
@@ -45,7 +46,7 @@
       }
     },
     mounted() {
-      //2500是因为我将所有axios请求timeout设为了2500ms
+      //这里控制默认加载速度
       setTimeout(() => {
         this.progressValue = Math.max(10, this.progressValue)
       }, 250)
