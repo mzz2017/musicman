@@ -68,7 +68,7 @@
       </div>
     </el-dialog>
     <transition name="loading-fade">
-      <loading v-if="isLoading"></loading>
+      <loading v-if="isLoading>0"></loading>
     </transition>
   </div>
 </template>
