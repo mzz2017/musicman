@@ -24,7 +24,7 @@ app.post('/api/search', jsonParser, (req, res) => {
       host: 'm.mzz.pub',
       port: '6666'
     },
-    timeout: 2500
+    timeout: 3500
   }).then((response) => {
     res.json(response.data)
   }).catch((error) => {
@@ -43,7 +43,7 @@ app.get('/api/vkey', (req, res) => {
       host: 'm.mzz.pub',
       port: '6666'
     },
-    timeout: 2500
+    timeout: 3500
   }).then((response) => {
     res.json({vkey: response.data.data.items[0].vkey})
   }).catch((error) => {

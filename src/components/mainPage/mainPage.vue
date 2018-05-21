@@ -68,7 +68,7 @@
       </div>
     </el-dialog>
     <transition name="loading-fade">
-      <loading v-if="isLoading>0"></loading>
+      <loading v-if="isLoading"></loading>
     </transition>
   </div>
 </template>
@@ -132,7 +132,6 @@
     },
     methods: {
       isSupportedBrowser() {
-        //0为支持，1表示不支持，2表示极其不支持（网页被转码，影响正常效果）
         if (browser.versions.mobile) {//判断是否是移动设备打开。browser代码在下面
           var ua = navigator.userAgent.toLowerCase();//获取判断用的对象
           let plat = browser.versions.android ? 'android' : 'ios'
@@ -193,7 +192,7 @@
         } else if (this.support.plat === 'android') {
           //安卓端那就只能随缘改存储名了吧
           this.downloadOrdinarily(url, savename)
-          if (this.support.type === 'qq')
+          if (this.support.type === 'qq' || this.support.type === 'qzone')
             alert('注意，由于当前浏览器的兼容性问题，我们无法确定文件的保存位置和文件名，请下载完毕后自行确认！')
           return
         }

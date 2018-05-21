@@ -26,7 +26,10 @@ $--padding: 2px;
   .refresh {
     font-size: 14px;
     font-weight: bold;
-    cursor: pointer;
+    z-index: 10001;
+    &:hover {
+      cursor: pointer;
+    }
   }
   .progress-wrapper {
     width: $--width;
@@ -67,12 +70,13 @@ $--padding: 2px;
       }
     }
   }
-  .overlay {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, .1);
-  }
+}
+
+.overlay {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, .1);
 }

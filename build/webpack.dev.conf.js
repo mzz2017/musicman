@@ -37,7 +37,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         axios({
           url: url,
           method: 'get',
-          timeout: 2500
+          timeout: 3500
         }).then((response) => {
           // console.log('ok', response)
           res.json(response.data)
@@ -54,7 +54,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         axios({
           url: getVkeyUrl,
           methods: 'get',
-          timeout: 2500
+          timeout: 3500
         }).then((response) => {
           res.json({vkey: response.data.data.items[0].vkey})
         }).catch((error) => {

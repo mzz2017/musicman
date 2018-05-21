@@ -1,5 +1,6 @@
 <template>
-  <transition name="loading-fade">
+  <div>
+    <div class="overlay" v-if="overlay"></div>
     <div class="loading" v-show="progressValue!==100">
       <p class="title">Loading...</p>
       <div class="progress-wrapper">
@@ -10,10 +11,9 @@
           </div>
         </div>
       </div>
-      <p class="refresh" v-show="progressValue===99" @click="location.reload(true)">刷新</p>
-      <div class="overlay" v-if="overlay"></div>
+      <p class="refresh" v-show="progressValue===99" @click="handleOnClickRefresh">刷新</p>
     </div>
-  </transition>
+  </div>
 </template>
 
 <script>
@@ -45,26 +45,23 @@
         this.progressValue = Math.max(val, this.progressValue)
       }
     },
+    methods: {
+      progressing() {
+        //这里控制默认加载速度
+        let cnt = 0
+        setInterval(() => {
+          cnt++
+          //自动增加的进度最大为99, 若设定的进度大于自动进度，则取设定的进度
+          this.progressValue = Math.max(Math.min(10 * cnt, 99), this.progressValue)
+        }, 250)
+      },
+      handleOnClickRefresh() {
+        console.log('clicked')
+        location.reload(true)
+      }
+    },
     mounted() {
-      //这里控制默认加载速度
-      setTimeout(() => {
-        this.progressValue = Math.max(10, this.progressValue)
-      }, 250)
-      setTimeout(() => {
-        this.progressValue = Math.max(20, this.progressValue)
-      }, 500)
-      setTimeout(() => {
-        this.progressValue = Math.max(40, this.progressValue)
-      }, 1000)
-      setTimeout(() => {
-        this.progressValue = Math.max(60, this.progressValue)
-      }, 1500)
-      setTimeout(() => {
-        this.progressValue = Math.max(80, this.progressValue)
-      }, 2000)
-      setTimeout(() => {
-        this.progressValue = Math.max(99, this.progressValue)
-      }, 2500)
+      this.progressing()
     }
   }
 </script>
