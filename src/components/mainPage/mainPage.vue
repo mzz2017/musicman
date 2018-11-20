@@ -121,7 +121,7 @@
         dialogDownloadVisible: false,
         dialogDownloadTitle: '成都-赵雷',
         downloadProgress: 0,
-        downloadStatus: '',
+        downloadStatus: null,
         downloadSpeed: 0,
         downloadAbort: false,
         downloadWrong: false,
@@ -319,7 +319,7 @@
         let that = this
         this.downloadAbort = false
         this.downloadProgress = 0
-        this.downloadStatus = ''
+        this.downloadStatus = null
 
         let beginTime = Date.parse(new Date().toUTCString())
         let lastCountTime = beginTime
