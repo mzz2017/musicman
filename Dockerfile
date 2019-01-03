@@ -6,5 +6,9 @@ ENV PM2_SECRET_KEY weot16tvbn11yto
 
 WORKDIR /app/
 ADD app.js /app/
+RUN npm install express
+RUN npm install body-parser
+RUN npm install axios
+
 EXPOSE 9000
-ENTRYPOINT ['pm2-runtime','app.js']
+ENTRYPOINT ["pm2","start","--no-daemon","app.js"]
