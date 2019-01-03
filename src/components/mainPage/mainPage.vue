@@ -294,7 +294,7 @@
         }).then((response) => {
           let vkey = response.data.vkey
           window.localStorage.setItem('vkey', vkey)
-          window.localStorage.setItem('vkey_expire', Date.parse(new Date().toUTCString()).toString())
+          window.localStorage.setItem('vkey_expire', new Date().getTime().toString())
         }).catch((error) => {
           process.env.NODE_ENV === 'development' && console.log('getVkey', error)
         })
@@ -321,7 +321,7 @@
         this.downloadProgress = 0
         this.downloadStatus = null
 
-        let beginTime = Date.parse(new Date().toUTCString())
+        let beginTime = new Date().getTime()
         let lastCountTime = beginTime
         //监听下载进度
         req.addEventListener('progress', (event) => {
@@ -332,7 +332,7 @@
             }
             that.downloadProgress = Math.floor(event.loaded / event.total * 100)
             //取下载速度(B/ms, 即KB/s), 速度更新间隔为0.5s
-            let nowTime = Date.parse(new Date().toUTCString())
+            let nowTime = new Date().getTime()
             if (nowTime - lastCountTime > 500) {
               lastCountTime = nowTime
               that.downloadSpeed = Math.floor(event.loaded / (nowTime - beginTime))
@@ -373,7 +373,7 @@
       this.compatibilityCheck()
 
       // 如果没有vkey或者vkey已经超时2个小时了，就再获取一下vkey
-      if (!window.localStorage.getItem('vkey') || Date.parse(new Date().toUTCString()) - parseInt(window.localStorage.getItem('vkey_expire')) > 2 * 60 * 60 * 1000) {
+      if (!window.localStorage.getItem('vkey') || new Date().getTime() - parseInt(window.localStorage.getItem('vkey_expire')) > 2 * 60 * 60 * 1000) {
         this.getVkey()
       }
       //按下Enter开始搜索
