@@ -9,6 +9,7 @@ import 'common/scss/_HYfont.css'
 import 'interceptor/interceptor'
 import {Input, Table, Button, TableColumn, Pagination, Dialog, Progress} from 'element-ui'
 
+
 Vue.use(Input)
 Vue.use(Table)
 Vue.use(Button)

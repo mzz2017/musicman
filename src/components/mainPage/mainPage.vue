@@ -74,6 +74,7 @@
 </template>
 <script>
   import Loading from 'base/loading/loading'
+  import { MessageBox } from 'element-ui';
 
   import axios from 'axios'
   import {download, saver} from '../../common/js/download'
@@ -121,7 +122,7 @@
         dialogDownloadVisible: false,
         dialogDownloadTitle: '成都-赵雷',
         downloadProgress: 0,
-        downloadStatus: null,
+        downloadStatus: 'success',
         downloadSpeed: 0,
         downloadAbort: false,
         downloadWrong: false,
@@ -165,13 +166,13 @@
           if (err || data.err === '') {
             //如果出现error，则只返回location.origin
             process.env.NODE_ENV === 'development' && console.log(data.err)
-            this.$alert(`${message}<br />链接地址： ${location.origin}`, 'Sorry!', {
+            MessageBox.alert(`${message}<br />链接地址： ${location.origin}`, 'Sorry!', {
               confirmButtonText: '朕知道了',
               dangerouslyUseHTMLString: true
             })
           } else {
             //一切顺利，返回短地址
-            this.$alert(`${message}<br />链接地址： ${data.url}`, 'Sorry!', {
+            MessageBox.alert(`${message}<br />链接地址： ${data.url}`, 'Sorry!', {
               confirmButtonText: '朕知道了',
               dangerouslyUseHTMLString: true
             })
@@ -253,12 +254,13 @@
         })
       },
       handleBeforeCloseDialogDownload(done) {
-        //下载完毕则直接可以关闭
-        if (this.downloadStatus !== '') {
+        //下载完毕则直接可以关闭，downloadStatus===null说明正在下载
+        if (this.downloadStatus) {
+          console.log("直接关闭", this.downloadStatus);
           done()
           return
         }
-        this.$confirm('确认停止下载？')
+        MessageBox.confirm('确认停止下载？')
           .then(() => {
             this.downloadAbort = true
             done();
