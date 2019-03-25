@@ -74,7 +74,7 @@
 </template>
 <script>
   import Loading from 'base/loading/loading'
-  import { MessageBox } from 'element-ui';
+  import {MessageBox} from 'element-ui';
 
   import axios from 'axios'
   import {download, saver} from '../../common/js/download'
@@ -183,7 +183,7 @@
         //获取vkey
         let vkey = window.localStorage.getItem('vkey')
         //合成下载链接
-        let url = `//streamoc.music.tc.qq.com/${this.formatMap[format].prefix}00${strMediaMid}.${this.formatMap[format].suffix}?vkey=${vkey}&guid=1234567890&uin=1008611&fromtag=8`
+        let url = `//183.131.60.16/amobile.music.tc.qq.com/${this.formatMap[format].prefix}00${strMediaMid}.${this.formatMap[format].suffix}?vkey=${vkey}&guid=1234567890&uin=1008611&fromtag=8`
         //合成文件名
         let savename = `${songName}-${singer}.${this.formatMap[format].suffix}`
         if (this.support.plat === 'ios') {
