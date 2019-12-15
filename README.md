@@ -1,6 +1,6 @@
 # musicman
 
-> 一个无限制下载QQ无损音乐的应用 Demo: http://music.mzz.pub
+> 一个无限制下载QQ无损音乐的应用 (Deprecated)
 
 ## Build Setup
 
